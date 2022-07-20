@@ -1,4 +1,5 @@
 const User = require('../models/User')
+const Employee = require('../models/Employee')
 const {StatusCodes} = require('http-status-codes')
 const CustomError  = require('../errors')
 
@@ -45,6 +46,42 @@ const logout = async(req,res) => {
 }
 
 
+const registerEmployee = async(req,res) => {
+
+    const {invitationLink,email,password} = req.body;
+
+    const user  = await User.findOne({email})
+
+    if (user) {
+        throw new CustomError.BadRequestError('User Already registered')
+    }
+
+    const employee = await Employee.findOne({email, invitationLink})
+
+    if (!employee) {
+        throw new CustomError.UnauthenticatedError('Invalid link')
+
+    }
+
+    const newUser = await User.create({
+        email, password, name: employee.name, role : 'user',
+    })
+
+    employee.user = newUser._id;
+    employee.registered = true;
+    employee.invitationLink = ''
+    await employee.save()
+
+    res.status(StatusCodes.CREATED).json({user : newUser})
+
+}
+
+
+const loginEmployee = async(req,res) => {
+
+}
+
+
 module.exports = {
-    register ,login ,logout
+    register ,login ,logout ,registerEmployee
 }
