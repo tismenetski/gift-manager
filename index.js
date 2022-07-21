@@ -10,10 +10,25 @@ const employeeRouter = require('./routes/employeeRoutes')
 const categoryRouter = require('./routes/categoryRoutes')
 const productRouter = require('./routes/productRoutes')
 
+// middleware
+const notFoundMiddleware = require('./middleware/not-found');
+const errorHandlerMiddleware = require('./middleware/error-handler');
+
+
+// cloudinary setup
+// USE V2
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+});
+
+
 const app = express()
 app.use(morgan('tiny'))
 app.use(express.json());
-app.use(fileUpload());
+app.use(fileUpload({ useTempFiles: true }));
 
 
 const port = process.env.PORT || 6060;
@@ -24,9 +39,8 @@ app.use('/api/v1/employee', employeeRouter)
 app.use('/api/v1/category', categoryRouter)
 app.use('/api/v1/product', productRouter)
 
-// middleware
-const notFoundMiddleware = require('./middleware/not-found');
-const errorHandlerMiddleware = require('./middleware/error-handler');
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const start = async() => {
 
