@@ -1,8 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
-const bcrypt = require("bcryptjs");
 const crypto = require('crypto')
-const jwt = require("jsonwebtoken");
 const sendInvitation = require('../utils/sendInvitation')
 
 const EmployeeSchema = new mongoose.Schema({
@@ -25,6 +23,10 @@ const EmployeeSchema = new mongoose.Schema({
         type  : String,
         required : true,
     },
+    address: {
+        type : String
+    },
+
     department : {
         type  : String,
         maxLength : 100
@@ -62,16 +64,13 @@ const EmployeeSchema = new mongoose.Schema({
     registered : {
         type : Boolean,
         default: false
+    },
+    balance : {
+        type :Number,
+        min : 0,
+        default : 0
     }
-} , {timestamps: true})
-
-EmployeeSchema.pre('save' , async function () {
-    // if (!this.isModified('password')) return;
-    // const salt = await bcrypt.genSalt(10);
-    // this.password = await bcrypt.hash(this.password, salt);
-
-
-})
+} , {timestamps: true })
 
 EmployeeSchema.methods.sendInvitation = async function () {
 

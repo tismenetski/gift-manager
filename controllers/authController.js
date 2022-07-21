@@ -76,12 +76,6 @@ const registerEmployee = async(req,res) => {
 
 }
 
-
-const loginEmployee = async(req,res) => {
-
-}
-
-
 module.exports = {
     register ,login ,logout ,registerEmployee
 }
