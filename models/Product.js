@@ -16,9 +16,11 @@ const ProductSchema = new mongoose.Schema({
         required: true,
         min : 0,
     },
+    images : {
+        type : [],
+    },
     colors : {
         type : [],
-
     },
     category : {
         type: mongoose.Schema.ObjectId,
