@@ -1,4 +1,5 @@
 const Employee = require('../models/Employee')
+const User = require('../models/User')
 const Client = require('../models/Client')
 const {StatusCodes} = require('http-status-codes')
 const CustomError  = require('../errors')
@@ -9,7 +10,7 @@ const getEmployees = async(req,res) => {
     const client = await Client.findOne({user : userId})
 
     if (!client) {
-        throw CustomError.BadRequestError('Bad request')
+        throw new CustomError.BadRequestError('Bad request')
 
     }
 
@@ -25,7 +26,7 @@ const createEmployee = async(req,res) => {
     const {name,email,department,job,workStartDate,salary} = req.body;
 
     if (!name || !email) {
-        throw CustomError.BadRequestError('Please provide name and email')
+        throw new CustomError.BadRequestError('Please provide name and email')
     }
 
     const userId = req.user.userId;
@@ -33,7 +34,7 @@ const createEmployee = async(req,res) => {
     const client = await Client.findOne({user : userId})
 
     if (!client) {
-        throw CustomError.BadRequestError('Bad request')
+        throw new CustomError.BadRequestError('Bad request')
 
     }
 
@@ -125,12 +126,42 @@ const updateEmployee = async(req,res) => {
 
 }
 
+/**
+ * Function can only be used by admins.
+ * The admin removes an employee and also removes the user
+ * @param req
+ * @param res
+ * @returns {Promise<void>}
+ */
 const deleteEmployee = async(req,res) => {
 
-    res.send('delete employee')
+    const {id:employeeId} = req.params; // get the employee id
+
+    const client = await Client.findOne({user : req.user.userId}) // get the client for this user
+
+    if (!client) {
+        throw new CustomError.BadRequestError('Bad request')
+
+    }
+
+    const employee = await Employee.findOneAndDelete({client : client._id , _id : employeeId} )
+    if (!employee) {
+        throw new CustomError.BadRequestError('Employee not found')
+
+    }
+
+    const user = await User.findOne({_id : employee.user}) // after we removed the employee we want to remove the user too
+
+    await user.remove()
+    res.status(StatusCodes.OK).json({msg : 'Employee Deleted Successfully'})
 }
 
-
+/**
+ * Function for role:user to get his employee information
+ * @param req
+ * @param res
+ * @returns {Promise<void>}
+ */
 const getEmployeeUser = async(req,res) => {
 
     const {email} = req.body;

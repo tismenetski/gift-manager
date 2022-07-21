@@ -21,6 +21,10 @@ const EmployeeSchema = new mongoose.Schema({
             message : 'Please provide valid email'
         }
     },
+    phone : {
+        type  : String,
+        required : true,
+    },
     department : {
         type  : String,
         maxLength : 100
